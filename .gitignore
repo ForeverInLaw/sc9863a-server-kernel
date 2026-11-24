@@ -1,3 +1,6 @@
 device/stock/modules/
 __pycache__/
 .aislop/
+out/
+kernel/
+clang/

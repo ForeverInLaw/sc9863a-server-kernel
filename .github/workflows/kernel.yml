@@ -1,12 +1,16 @@
 # Builds the Aether SC9863A kernel with the phone's running config (plus a
 # fragment per variant) and checks whether the stock vendor modules would still
-# load against it, by comparing symbol CRCs.
+# load against it. The build itself lives in tools/build.sh, shared with local builds.
 name: kernel
 
 on:
   push:
-    paths: [configs/**, device/stock/config/**, tools/**, .github/workflows/kernel.yml]
+    paths: [configs/**, patches/**, device/stock/config/**, tools/**, .github/workflows/kernel.yml]
   workflow_dispatch:
+
+concurrency:
+  group: kernel-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   AETHER_REPO: https://github.com/Yazz246/Aether_Kernel-A665L
@@ -40,8 +44,6 @@ jobs:
         if: steps.clang.outputs.cache-hit != 'true'
         run: mkdir clang && curl -sSfL "$CLANG_URL" | tar xz -C clang
 
-      - run: echo "$PWD/clang/bin" >> "$GITHUB_PATH"
-
       - name: Install host tools
         run: |
           sudo apt-get update -qq
@@ -50,42 +52,21 @@ jobs:
       - name: Add swap for LTO link
         run: sudo fallocate -l 16G /swap2 && sudo chmod 600 /swap2 && sudo mkswap /swap2 && sudo swapon /swap2
 
-      - name: Configure
-        working-directory: kernel
-        run: |
-          mkdir -p out
-          cp ../device/stock/config/running.config out/.config
-          scripts/kconfig/merge_config.sh -m -O out out/.config ../configs/${{ matrix.variant }}.fragment
-          make $MAKE_ARGS olddefconfig
-          echo "### Options that did not stick" >> $GITHUB_STEP_SUMMARY
-          grep -E '^CONFIG_' ../configs/${{ matrix.variant }}.fragment | while read -r opt; do
-            grep -qx "$opt" out/.config || echo "- \`$opt\`" | tee -a $GITHUB_STEP_SUMMARY
-          done
+      - name: Build and check ABI
+        run: tools/build.sh ${{ matrix.variant }}
 
-      - name: Build
-        working-directory: kernel
-        run: |
-          make $MAKE_ARGS -j"$(nproc)" Image modules > ../build.log 2>&1 || { tail -60 ../build.log; exit 1; }
-          test -f out/Module.symvers
-
-      - name: Check stock module ABI
-        run: |
-          python3 tools/modcrc.py check kernel/out/Module.symvers device/stock/config/module_crcs.tsv | tee abi.txt || true
-          { echo "### ABI check (${{ matrix.variant }})"; echo '```'; cat abi.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+      - name: Summary
+        if: always()
+        run: cat out/${{ matrix.variant }}/report.md >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: kernel-${{ matrix.variant }}
           path: |
-            abi.txt
-            build.log
-            kernel/out/.config
-            kernel/out/Module.symvers
-            kernel/out/arch/arm64/boot/Image
-
-    env:
-      MAKE_ARGS: >-
-        O=out ARCH=arm64 LLVM=1 LLVM_IAS=1
-        CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
-        KCFLAGS=-D__ANDROID_COMMON_KERNEL__
+            out/${{ matrix.variant }}/report.md
+            out/${{ matrix.variant }}/abi.txt
+            out/${{ matrix.variant }}/build.log
+            out/${{ matrix.variant }}/.config
+            out/${{ matrix.variant }}/Module.symvers
+            out/${{ matrix.variant }}/arch/arm64/boot/Image

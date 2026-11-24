@@ -1,0 +1,20 @@
+diff --git a/include/uapi/drm/gsp_r9p0_cfg.h b/include/uapi/drm/gsp_r9p0_cfg.h
+index 52eaafdb8..fa1ebc5e2 100644
+--- a/include/uapi/drm/gsp_r9p0_cfg.h
++++ b/include/uapi/drm/gsp_r9p0_cfg.h
+@@ -15,6 +15,7 @@
+ #define R9P0_IMGSEC_NUM 0
+ #define R9P0_OSDSEC_NUM 1
+ #define HDR_TM_LUT_SIZE (1024 + 1)
++#define HDR_REGAMMA_LUT_SIZE 1024
+ #define GSP_R9P0_FREQ_256M 256000000
+ #define GSP_R9P0_FREQ_307_2M 307200000
+ #define GSP_R9P0_FREQ_384M 384000000
+@@ -286,6 +287,7 @@ struct gsp_r9p0_hdr10_cfg {
+ 	int reg_hdr_tmlut_addr;
+ 	int reg_hdr_tmlut_data;
+ 
++	__u32 hdr_regamma_lut_table[HDR_REGAMMA_LUT_SIZE];
+ 	__u32 hdr_tone_mapping_lut_table[HDR_TM_LUT_SIZE];
+ };
+ 
