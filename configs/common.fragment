@@ -1,0 +1,4 @@
+# Build-speed settings applied to every variant. They change code generation only,
+# not symbol CRCs, so the module ABI check stays valid.
+# ThinLTO links in parallel; the stock full-LTO link runs on a single core for ~1h.
+CONFIG_THINLTO=y

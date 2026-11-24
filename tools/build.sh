@@ -3,6 +3,7 @@
 #
 #   tools/build.sh <variant>     # variant = configs/<variant>.fragment
 #
+# The config is the phone's running config + configs/common.fragment + the variant fragment.
 # Expects the Aether source in ./kernel and clang r416183b in ./clang (override with
 # KERNEL_DIR / CLANG_DIR). Output goes to out/<variant>/: build.log, abi.txt, report.md,
 # Module.symvers, arch/arm64/boot/Image. Re-running reuses the tree, so builds are incremental.
@@ -28,13 +29,15 @@ done
 
 mkdir -p "$out"
 cp "$root/device/stock/config/running.config" "$out/.config"
-"$kernel/scripts/kconfig/merge_config.sh" -m -O "$out" "$out/.config" "$fragment" > /dev/null
+"$kernel/scripts/kconfig/merge_config.sh" -m -O "$out" "$out/.config" "$root/configs/common.fragment" "$fragment" > /dev/null
 kmake olddefconfig > /dev/null
 
 {
   echo "### $variant"
   echo "Options that did not stick:"
-  grep -E '^CONFIG_' "$fragment" | while read -r opt; do grep -qx "$opt" "$out/.config" || echo "- \`$opt\`"; done
+  cat "$root/configs/common.fragment" "$fragment" | { grep -E '^CONFIG_' || true; } | while read -r opt; do
+    grep -qx "$opt" "$out/.config" || echo "- \`$opt\`"
+  done
 } > "$out/report.md"
 
 if ! kmake -j"${JOBS:-$(nproc)}" Image modules > "$out/build.log" 2>&1; then
