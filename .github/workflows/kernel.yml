@@ -64,7 +64,9 @@ jobs:
 
       - name: Build
         working-directory: kernel
-        run: make $MAKE_ARGS -j"$(nproc)" Image modules 2>&1 | tee ../build.log | grep -E 'error|warning: .*undefined' || true; test -f out/Module.symvers
+        run: |
+          make $MAKE_ARGS -j"$(nproc)" Image modules > ../build.log 2>&1 || { tail -60 ../build.log; exit 1; }
+          test -f out/Module.symvers
 
       - name: Check stock module ABI
         run: |
