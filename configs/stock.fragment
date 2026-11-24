@@ -1,0 +1,2 @@
+# Baseline: the phone's running config with no changes. Its CRC report shows how
+# far the Aether 5.4.286 tree already is from the 5.4.161 stock kernel ABI.

@@ -1,0 +1,140 @@
+mipi_driver 24576 0 - Live 0x0000000000000000
+silead_fp 49152 0 - Live 0x0000000000000000 (O)
+sprd_mipi 24576 1 mipi_driver, Live 0x0000000000000000
+sprd_net_helper 28672 0 - Live 0x0000000000000000
+sprd_2stage_dmaengine_pcm 69632 2 - Live 0x0000000000000000
+snd_soc_sprd_i2s_card 24576 0 [permanent], Live 0x0000000000000000
+snd_soc_sprd_i2s 57344 3 sprd_2stage_dmaengine_pcm,snd_soc_sprd_i2s_card, Live 0x0000000000000000
+snd_soc_sprd_dummy_codec 24576 0 - Live 0x0000000000000000
+snd_soc_sprd_codec_sc2721_power_dev 32768 0 [permanent], Live 0x0000000000000000
+snd_soc_sprd_codec_sc2721_power 36864 16 - Live 0x0000000000000000
+snd_soc_sprd_codec_sc2721 217088 1 [permanent], Live 0x0000000000000000
+snd_soc_sprd_vbc_r1p0v3 155648 3 sprd_2stage_dmaengine_pcm,snd_soc_sprd_codec_sc2721,[permanent], Live 0x0000000000000000
+snd_soc_sprd_vaudio 28672 2 snd_soc_sprd_vbc_r1p0v3, Live 0x0000000000000000
+snd_soc_sprd_card 77824 8 sprd_2stage_dmaengine_pcm,snd_soc_sprd_i2s_card,snd_soc_sprd_i2s,snd_soc_sprd_codec_sc2721_power,snd_soc_sprd_codec_sc2721,snd_soc_sprd_vbc_r1p0v3,snd_soc_sprd_vaudio,[permanent], Live 0x0000000000000000
+saudio 53248 1 - Live 0x0000000000000000
+sprd_apipe 40960 3 - Live 0x0000000000000000
+audio_mem 36864 1 sprd_2stage_dmaengine_pcm, Live 0x0000000000000000
+sprd_map 36864 0 - Live 0x0000000000000000
+exfat 147456 0 - Live 0x0000000000000000 (C)
+ax88179_178a 45056 0 - Live 0x0000000000000000
+asix 94208 0 - Live 0x0000000000000000
+sprd_wdf 28672 0 [permanent], Live 0x0000000000000000
+sprd_pmic_wdt 24576 0 - Live 0x0000000000000000
+sprd_usb_f_rndis 57344 0 - Live 0x0000000000000000
+sprd_u_ether 45056 1 sprd_usb_f_rndis, Live 0x0000000000000000
+misc_sprd_uid 24576 0 - Live 0x0000000000000000
+thermal_generic_adc 24576 0 - Live 0x0000000000000000
+sprd_dedicate_thm 24576 0 - Live 0x0000000000000000
+sprd_cpu_cooling 40960 0 - Live 0x0000000000000000
+sprd_cpufreq_public 28672 0 - Live 0x0000000000000000
+cpufreq_userspace 28672 0 - Live 0x0000000000000000
+spi_sprd 36864 0 - Live 0x0000000000000000
+ledtrig_pattern 24576 0 - Live 0x0000000000000000
+jpg 69632 0 - Live 0x0000000000000000
+vsp 90112 0 - Live 0x0000000000000000
+zram 61440 1 - Live 0x0000000000000000
+zsmalloc 49152 1 zram, Live 0x0000000000000000
+microarray_fp 36864 0 - Live 0x0000000000000000 (O)
+twofish_generic 28672 0 - Live 0x0000000000000000
+twofish_common 32768 1 twofish_generic, Live 0x0000000000000000
+arc4 24576 0 - Live 0x0000000000000000
+sprd_cpp 98304 0 - Live 0x0000000000000000 (O)
+sprd_vsp_pw_domain 28672 0 - Live 0x0000000000000000
+sprd_camera 1531904 1 sprd_cpp, Live 0x0000000000000000 (O)
+sprd_ion 36864 2 sprd_cpp,sprd_camera, Live 0x0000000000000000 (C)
+sprd_sensor 200704 1 sprd_camera, Live 0x0000000000000000 (O)
+sprd_camsys_pw_domain 45056 0 - Live 0x0000000000000000
+flash_ic_sc2721_led 24576 0 - Live 0x0000000000000000 (O)
+flash_ic_sc2721 24576 0 - Live 0x0000000000000000 (O)
+flash_ic_dio5151 24576 0 - Live 0x0000000000000000 (O)
+sprd_flash_drv 24576 4 sprd_camera,flash_ic_sc2721_led,flash_ic_sc2721,flash_ic_dio5151, Live 0x0000000000000000 (O)
+pvrsrvkm 1482752 1641 - Live 0x0000000000000000 (O)
+sfp_core 143360 0 - Live 0x0000000000000000
+ims_bridge 90112 0 - Live 0x0000000000000000
+gnss_pmnotify_ctl 24576 1 - Live 0x0000000000000000
+gnss_dbg 32768 1 - Live 0x0000000000000000
+sprd_fm 69632 0 - Live 0x0000000000000000 (O)
+sprdbt_tty 45056 2 - Live 0x0000000000000000 (O)
+sc2332_sipc_wlan 122880 0 - Live 0x0000000000000000
+sprd_wlan 110592 1 sc2332_sipc_wlan, Live 0x0000000000000000
+musb_sprd 40960 0 - Live 0x0000000000000000
+musb_hdrc 192512 1 musb_sprd, Live 0x0000000000000000
+fan54015_charger 28672 1 - Live 0x0000000000000000
+sc27xx_fuel_gauge 69632 0 - Live 0x0000000000000000
+charger_manager 98304 2 fan54015_charger,sc27xx_fuel_gauge, Live 0x0000000000000000
+sprd_vote 28672 1 charger_manager, Live 0x0000000000000000
+leds_sc27xx_bltc 24576 1 flash_ic_sc2721_led, Live 0x0000000000000000
+sprd_battery_info 28672 3 fan54015_charger,sc27xx_fuel_gauge,charger_manager, Live 0x0000000000000000
+phy_sprd_sharkl3 28672 3 - Live 0x0000000000000000
+fan53555 24576 0 - Live 0x0000000000000000
+sensorhub 69632 3 - Live 0x0000000000000000
+kfifo_buf 24576 1 sensorhub, Live 0x0000000000000000
+sc27xx_vibra 24576 0 - Live 0x0000000000000000
+sc27xx_typec 24576 0 - Live 0x0000000000000000
+sc27xx_poweroff 24576 0 - Live 0x0000000000000000
+sc27xx_adc 32768 0 - Live 0x0000000000000000
+rtc_sc27xx 24576 1 - Live 0x0000000000000000
+extcon_usb_gpio 24576 0 - Live 0x0000000000000000
+gnss_common_ctl_all 28672 1 gnss_pmnotify_ctl, Live 0x0000000000000000
+wcn_bsp 487424 6 sprd_fm,sprdbt_tty,sprd_wlan,gnss_common_ctl_all, Live 0x0000000000000000
+sprd_drm 507904 2 - Live 0x0000000000000000
+sprd_gsp 282624 1 sprd_drm, Live 0x0000000000000000
+sprd_disp_pm_domain_sharkl3 24576 0 - Live 0x0000000000000000
+pwm_bl 32768 0 - Live 0x0000000000000000
+pwm_sprd 24576 1 - Live 0x0000000000000000
+pinctrl_sprd_sharkl3 40960 0 - Live 0x0000000000000000
+pinctrl_sprd 32768 1 pinctrl_sprd_sharkl3, Live 0x0000000000000000
+unisoc_iommu 86016 6 jpg,vsp,sprd_cpp,sprd_camera,sprd_drm,sprd_gsp, Live 0x0000000000000000
+sprd_ddr_dvfs 49152 0 - Live 0x0000000000000000
+seth 36864 0 - Live 0x0000000000000000
+sprd_dma 36864 0 - Live 0x0000000000000000
+virt_dma 28672 1 sprd_dma, Live 0x0000000000000000
+pinctrl 28672 0 - Live 0x0000000000000000
+gpio 28672 0 - Live 0x0000000000000000
+core 24576 2 pinctrl,gpio, Live 0x0000000000000000
+sdhci_sprd 40960 0 - Live 0x0000000000000000
+mmc_hsq 24576 1 sdhci_sprd, Live 0x0000000000000000
+sblock_bridge 28672 0 - Live 0x0000000000000000
+sbuf_bridge 28672 0 - Live 0x0000000000000000
+slog_bridge 32768 0 - Live 0x0000000000000000
+sprd_iq 28672 0 - Live 0x0000000000000000
+usb_f_vser 53248 4 slog_bridge,sprd_iq, Live 0x0000000000000000
+sprd_modem_loader 40960 0 - Live 0x0000000000000000
+sipx 49152 1 seth, Live 0x0000000000000000
+spool 32768 0 - Live 0x0000000000000000
+spipe 28672 22 - Live 0x0000000000000000
+sipc_core 172032 18 saudio,sprd_pmic_wdt,ims_bridge,sprd_fm,sprdbt_tty,sc2332_sipc_wlan,sensorhub,wcn_bsp,sprd_ddr_dvfs,seth,sblock_bridge,sbuf_bridge,slog_bridge,sprd_iq,sprd_modem_loader,sipx,spool,spipe, Live 0x0000000000000000
+sprd_sipc_virt_bus 24576 0 - Live 0x0000000000000000
+unisoc_mailbox 40960 5 [permanent], Live 0x0000000000000000
+sprd_power_manager 40960 3 sbuf_bridge,sprd_modem_loader,sipc_core, Live 0x0000000000000000
+sprd_shm 28672 0 - Live 0x0000000000000000
+trusty_virtio 36864 0 - Live 0x0000000000000000
+trusty_ipc 49152 18 wcn_bsp,sprd_drm, Live 0x0000000000000000
+trusty_irq 36864 0 - Live 0x0000000000000000
+trusty_log 28672 0 - Live 0x0000000000000000
+trusty_pm 24576 0 - Live 0x0000000000000000
+trusty 40960 5 sprd_shm,trusty_virtio,trusty_irq,trusty_log,trusty_pm, Live 0x0000000000000000
+sprd_manufacturer_model 24576 0 - Live 0x0000000000000000
+sprd_7sreset 24576 0 - Live 0x0000000000000000
+sprd_hwdvfs_sharkl3 49152 0 - Live 0x0000000000000000
+sprd_union_hwcpufreq 40960 1 sprd_hwdvfs_sharkl3, Live 0x0000000000000000
+i2c_sprd_hw 32768 0 - Live 0x0000000000000000
+i2c_sprd 36864 0 - Live 0x0000000000000000
+nvmem_sprd_efuse 24576 0 - Live 0x0000000000000000
+nvmem_sc27xx_efuse 24576 0 - Live 0x0000000000000000
+gpio_pmic_eic_sprd 24576 13 - Live 0x0000000000000000
+gpio_plus_sprd 28672 20 - Live 0x0000000000000000
+gpio_eic_sprd 32768 2 - Live 0x0000000000000000
+sprd_soc_id 28672 0 - Live 0x0000000000000000
+sc2721_regulator 28672 7 - Live 0x0000000000000000
+sprd_sc27xx_spi 24576 0 - Live 0x0000000000000000
+spi_sprd_adi 24576 0 - Live 0x0000000000000000
+sprd_hwspinlock 24576 3 - Live 0x0000000000000000
+sc9863a_clk 143360 192 - Live 0x0000000000000000
+clk_sprd 32768 1 sc9863a_clk, Live 0x0000000000000000
+sprd_time_sync_cp 24576 0 - Live 0x0000000000000000
+sprd_time_sync 28672 2 sprd_time_sync_cp, Live 0x0000000000000000
+sprd_systimer 24576 2 sensorhub,sprd_time_sync,[permanent], Live 0x0000000000000000
+sprd_sip_svc 24576 0 [permanent], Live 0x0000000000000000
+sprd_wdt_fiq 32768 1 sprd_wdf, Live 0x0000000000000000

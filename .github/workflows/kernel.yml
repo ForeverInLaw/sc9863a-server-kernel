@@ -1,0 +1,89 @@
+# Builds the Aether SC9863A kernel with the phone's running config (plus a
+# fragment per variant) and checks whether the stock vendor modules would still
+# load against it, by comparing symbol CRCs.
+name: kernel
+
+on:
+  push:
+    paths: [configs/**, device/stock/config/**, tools/**, .github/workflows/kernel.yml]
+  workflow_dispatch:
+
+env:
+  AETHER_REPO: https://github.com/Yazz246/Aether_Kernel-A665L
+  AETHER_SHA: 6de186e85509909ad7ba21faf4c4568fe5801555
+  CLANG_URL: https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/tags/android-12.0.0_r12/clang-r416183b.tar.gz
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [stock, docker]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch kernel source
+        run: |
+          git init -q kernel && cd kernel
+          git fetch -q --depth 1 "$AETHER_REPO" "$AETHER_SHA" && git checkout -q FETCH_HEAD
+
+      - name: Cache clang r416183b
+        id: clang
+        uses: actions/cache@v4
+        with:
+          path: clang
+          key: clang-r416183b
+
+      - name: Download clang r416183b (same compiler as the stock kernel)
+        if: steps.clang.outputs.cache-hit != 'true'
+        run: mkdir clang && curl -sSfL "$CLANG_URL" | tar xz -C clang
+
+      - run: echo "$PWD/clang/bin" >> "$GITHUB_PATH"
+
+      - name: Install host tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq binutils-aarch64-linux-gnu gcc-arm-linux-gnueabi bc bison flex libssl-dev libelf-dev cpio
+
+      - name: Add swap for LTO link
+        run: sudo fallocate -l 16G /swap2 && sudo chmod 600 /swap2 && sudo mkswap /swap2 && sudo swapon /swap2
+
+      - name: Configure
+        working-directory: kernel
+        run: |
+          mkdir -p out
+          cp ../device/stock/config/running.config out/.config
+          scripts/kconfig/merge_config.sh -m -O out out/.config ../configs/${{ matrix.variant }}.fragment
+          make $MAKE_ARGS olddefconfig
+          echo "### Options that did not stick" >> $GITHUB_STEP_SUMMARY
+          grep -E '^CONFIG_' ../configs/${{ matrix.variant }}.fragment | while read -r opt; do
+            grep -qx "$opt" out/.config || echo "- \`$opt\`" | tee -a $GITHUB_STEP_SUMMARY
+          done
+
+      - name: Build
+        working-directory: kernel
+        run: make $MAKE_ARGS -j"$(nproc)" Image modules 2>&1 | tee ../build.log | grep -E 'error|warning: .*undefined' || true; test -f out/Module.symvers
+
+      - name: Check stock module ABI
+        run: |
+          python3 tools/modcrc.py check kernel/out/Module.symvers device/stock/config/module_crcs.tsv | tee abi.txt || true
+          { echo "### ABI check (${{ matrix.variant }})"; echo '```'; cat abi.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kernel-${{ matrix.variant }}
+          path: |
+            abi.txt
+            build.log
+            kernel/out/.config
+            kernel/out/Module.symvers
+            kernel/out/arch/arm64/boot/Image
+
+    env:
+      MAKE_ARGS: >-
+        O=out ARCH=arm64 LLVM=1 LLVM_IAS=1
+        CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
+        KCFLAGS=-D__ANDROID_COMMON_KERNEL__

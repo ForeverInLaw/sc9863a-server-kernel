@@ -1,0 +1,7 @@
+# Minimal additions on top of the stock config so Docker / Droidspaces can run.
+# Kept deliberately small: every option that changes a struct layout breaks the
+# prebuilt vendor modules (pvrsrvkm etc.), so ABI impact is checked in CI.
+CONFIG_PID_NS=y
+CONFIG_IPC_NS=y
+CONFIG_POSIX_MQUEUE=y
+CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
