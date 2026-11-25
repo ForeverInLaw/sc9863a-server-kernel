@@ -1,4 +1,10 @@
-# Build-speed settings applied to every variant. They change code generation only,
-# not symbol CRCs, so the module ABI check stays valid.
+# Applied to every variant. None of these change symbol CRCs, so the module ABI
+# check stays valid.
+
 # ThinLTO links in parallel; the stock full-LTO link runs on a single core for ~1h.
 CONFIG_THINLTO=y
+
+# Stock vendor modules are signed with the vendor's key, which our build does not
+# have. Without FORCE they still load (the kernel is only tainted). MODULE_SIG itself
+# stays on: turning it off removes fields from struct module and breaks every CRC.
+# CONFIG_MODULE_SIG_FORCE is not set

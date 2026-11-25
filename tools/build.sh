@@ -35,7 +35,7 @@ kmake olddefconfig > /dev/null
 {
   echo "### $variant"
   echo "Options that did not stick:"
-  cat "$root/configs/common.fragment" "$fragment" | { grep -E '^CONFIG_' || true; } | while read -r opt; do
+  cat "$root/configs/common.fragment" "$fragment" | { grep -E '^(CONFIG_|# CONFIG_.* is not set$)' || true; } | while IFS= read -r opt; do
     grep -qx "$opt" "$out/.config" || echo "- \`$opt\`"
   done
 } > "$out/report.md"
