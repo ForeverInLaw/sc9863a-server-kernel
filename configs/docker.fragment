@@ -1,7 +1,37 @@
-# Minimal additions on top of the stock config so Docker / Droidspaces can run.
-# Kept deliberately small: every option that changes a struct layout breaks the
-# prebuilt vendor modules (pvrsrvkm etc.), so ABI impact is checked in CI.
-CONFIG_PID_NS=y
-CONFIG_IPC_NS=y
+# Droidspaces + Docker on top of the stock config, following the Droidspaces GKI list
+# (Documentation/Kernel-Configuration.md in ravindu644/Droidspaces-OSS).
+# Options that move struct fields are made ABI-safe by patches/000{2,3}; every
+# addition is checked against the stock vendor modules' CRCs by tools/build.sh.
+# CFS_BANDWIDTH and CGROUP_PIDS stay off: they resize scheduler/cgroup structs and
+# no padding slot covers them (Docker just skips --cpus / --pids-limit).
+
+# IPC and namespaces
+CONFIG_SYSVIPC=y
 CONFIG_POSIX_MQUEUE=y
+CONFIG_IPC_NS=y
+CONFIG_PID_NS=y
+# Docker refuses to run with an "unsafe procfs" error without it
+CONFIG_USER_NS=y
+
+# Hardware access from the container
+CONFIG_DEVTMPFS=y
+
+# Networking: NAT, IPv6 NAT, macvlan (container directly on the LAN)
 CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
+CONFIG_IP6_NF_NAT=y
+CONFIG_IP6_NF_TARGET_MASQUERADE=y
+CONFIG_MACVLAN=y
+
+# UFW and Fail2Ban inside the container
+CONFIG_IP_NF_TARGET_REJECT=y
+CONFIG_IP6_NF_TARGET_REJECT=y
+CONFIG_NETFILTER_XT_TARGET_LOG=y
+CONFIG_NETFILTER_XT_MATCH_RECENT=y
+CONFIG_IP_SET=y
+CONFIG_IP_SET_HASH_IP=y
+CONFIG_IP_SET_HASH_NET=y
+CONFIG_NETFILTER_XT_SET=y
+
+# xattr / ACLs on tmpfs (systemd, NixOS)
+CONFIG_TMPFS_POSIX_ACL=y
+CONFIG_TMPFS_XATTR=y
