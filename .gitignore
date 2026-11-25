@@ -5,3 +5,5 @@ out/
 kernel/
 clang/
 mkbootimg/
+device/stock/dump/
+tools/unlock/
