@@ -1,12 +1,14 @@
-"""Compare kernel symbol CRCs that prebuilt modules expect against a kernel build.
+"""Check whether prebuilt vendor modules would load on a rebuilt kernel.
 
 Usage:
-  python modcrc.py dump  <module.ko>... > crcs.tsv     # "module<TAB>symbol<TAB>crc" per import
-  python modcrc.py check <Module.symvers> <crcs.tsv>   # report modules that would fail to load
+  python modcrc.py dump  <module.ko>... > crcs.tsv     # kernel imports of a full module set
+  python modcrc.py check <Module.symvers> <crcs.tsv>   # report modules the kernel would reject
 
-A module built with CONFIG_MODVERSIONS records the CRC of every kernel symbol it
-imports in its __versions section. The kernel refuses to load it if any CRC
-differs from the one exported by the running kernel (recorded in Module.symvers).
+A module built with CONFIG_MODVERSIONS records the CRC of every symbol it imports in
+its __versions section, and the kernel refuses to load it if a CRC differs from the
+exporter's. `dump` keeps only imports that no module in the set exports itself: those
+must come from the kernel image. Symbols shared between vendor modules stay consistent
+as long as the modules are shipped together, so they are not checked.
 """
 
 from __future__ import annotations
@@ -19,36 +21,40 @@ from pathlib import Path
 MODVERSION_ENTRY = 64
 
 
-def imported_crcs(ko: Path) -> dict[str, int]:
+def sections(ko: Path) -> dict[bytes, bytes]:
     data = ko.read_bytes()
     if data[:4] != b"\x7fELF" or data[4] != 2:
         raise ValueError(f"{ko.name}: not an ELF64 file")
     shoff, = struct.unpack_from("<Q", data, 0x28)
     shentsize, shnum, shstrndx = struct.unpack_from("<HHH", data, 0x3A)
-
-    def section(i: int) -> tuple[int, int, int]:
-        name, _type, _flags, _addr, offset, size = struct.unpack_from("<IIQQQQ", data, shoff + i * shentsize)
-        return name, offset, size
-
-    _, strtab_off, _ = section(shstrndx)
-    for i in range(shnum):
-        name_off, offset, size = section(i)
-        name = data[strtab_off + name_off : data.index(b"\0", strtab_off + name_off)]
-        if name == b"__versions":
-            entries = {}
-            for pos in range(offset, offset + size, MODVERSION_ENTRY):
-                crc, = struct.unpack_from("<Q", data, pos)
-                sym = data[pos + 8 : pos + MODVERSION_ENTRY].split(b"\0", 1)[0].decode()
-                entries[sym] = crc & 0xFFFFFFFF
-            return entries
-    return {}
+    headers = [struct.unpack_from("<IIQQQQ", data, shoff + i * shentsize) for i in range(shnum)]
+    strtab = headers[shstrndx][4]
+    return {
+        data[strtab + name : data.index(b"\0", strtab + name)]: data[offset : offset + size]
+        for name, _type, _flags, _addr, offset, size in headers
+    }
 
 
-def exported_crcs(symvers: Path) -> dict[str, int]:
+def imported_crcs(ko: Path) -> dict[str, int]:
+    raw = sections(ko).get(b"__versions", b"")
+    entries = {}
+    for pos in range(0, len(raw), MODVERSION_ENTRY):
+        crc, = struct.unpack_from("<Q", raw, pos)
+        entries[raw[pos + 8 : pos + MODVERSION_ENTRY].split(b"\0", 1)[0].decode()] = crc & 0xFFFFFFFF
+    return entries
+
+
+def exported_names(ko: Path) -> set[str]:
+    return {s.decode() for s in sections(ko).get(b"__ksymtab_strings", b"").split(b"\0") if s}
+
+
+def kernel_exports(symvers: Path) -> dict[str, int]:
+    # Module.symvers line: crc, symbol, exporter ("vmlinux" or a module path), export type
     crcs = {}
     for line in symvers.read_text().splitlines():
-        crc, sym, *_ = line.split("\t")
-        crcs[sym] = int(crc, 16)
+        crc, sym, exporter, *_ = line.split("\t")
+        if exporter == "vmlinux":
+            crcs[sym] = int(crc, 16)
     return crcs
 
 
@@ -63,12 +69,15 @@ def read_tsv(path: Path) -> dict[str, dict[str, int]]:
 def main(argv: list[str]) -> int:
     match argv:
         case ["dump", *kos]:
-            for ko in map(Path, kos):
+            kos = [Path(k) for k in kos]
+            provided = set().union(*(exported_names(ko) for ko in kos))
+            for ko in kos:
                 for sym, crc in sorted(imported_crcs(ko).items()):
-                    print(f"{ko.stem}\t{sym}\t0x{crc:08x}")
+                    if sym not in provided:
+                        print(f"{ko.stem}\t{sym}\t0x{crc:08x}")
             return 0
         case ["check", symvers, tsv]:
-            kernel = exported_crcs(Path(symvers))
+            kernel = kernel_exports(Path(symvers))
             modules = read_tsv(Path(tsv))
             broken = 0
             for module, imports in sorted(modules.items()):
