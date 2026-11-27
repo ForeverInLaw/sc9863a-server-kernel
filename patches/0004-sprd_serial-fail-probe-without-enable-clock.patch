@@ -1,0 +1,17 @@
+diff --git a/drivers/tty/serial/sprd_serial.c b/drivers/tty/serial/sprd_serial.c
+index a1332445e..00398fb37 100644
+--- a/drivers/tty/serial/sprd_serial.c
++++ b/drivers/tty/serial/sprd_serial.c
+@@ -1243,8 +1243,11 @@ static int sprd_probe(struct platform_device *pdev)
+ 	up->flags = UPF_BOOT_AUTOCONF;
+ 
+ 	ret = sprd_clk_init(up);
+-	if (ret < 0)
++	if (ret < 0) {
+ 		dev_err(&pdev->dev, " fail to get source clk\n");
++		sprd_port[index] = NULL;
++		return ret;
++	}
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	up->membase = devm_ioremap_resource(&pdev->dev, res);
+ 	if (IS_ERR(up->membase))
