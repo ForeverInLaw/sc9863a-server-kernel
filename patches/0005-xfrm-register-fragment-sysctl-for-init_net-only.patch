@@ -1,0 +1,22 @@
+diff --git a/net/xfrm/xfrm_sysctl.c b/net/xfrm/xfrm_sysctl.c
+index 3073cd8c5..771396b5e 100644
+--- a/net/xfrm/xfrm_sysctl.c
++++ b/net/xfrm/xfrm_sysctl.c
+@@ -87,6 +87,8 @@ int __net_init xfrm_sysctl_init(struct net *net)
+ 		goto out_register;
+ 
+ #ifdef CONFIG_XFRM_FRAGMENT
++	if (!net_eq(net, &init_net))
++		return 0;
+ 	sprd_sys_ctl_table = kmemdup(sprd_net_sys_table,
+ 				     sizeof(sprd_net_sys_table), GFP_KERNEL);
+ 	if (!sprd_sys_ctl_table)
+@@ -120,7 +122,7 @@ void __net_exit xfrm_sysctl_fini(struct net *net)
+ 	unregister_net_sysctl_table(net->xfrm.sysctl_hdr);
+ 	kfree(table);
+ #ifdef CONFIG_XFRM_FRAGMENT
+-	if (sprd_xfrm_hdr) {
++	if (net_eq(net, &init_net) && sprd_xfrm_hdr) {
+ 		unregister_net_sysctl_table(sprd_xfrm_hdr);
+ 		kfree(sprd_sys_ctl_table);
+ 	}
