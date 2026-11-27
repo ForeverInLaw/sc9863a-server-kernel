@@ -76,7 +76,6 @@ com.unisoc.silent.reboot
 # AOSP user-facing apps
 com.android.backupconfirm
 com.android.bips
-com.android.bluetooth
 com.android.bluetoothmidiservice
 com.android.bookmarkprovider
 com.android.calllogbackup

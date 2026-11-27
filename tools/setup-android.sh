@@ -5,7 +5,7 @@
 #   tools/setup-android.sh   # over USB or Wi-Fi adb (pick the device with ANDROID_SERIAL)
 #
 # Disables every package in device/android/debloat.list and wipes its data and
-# updates (undo one with `pm enable <pkg>`), turns off the modem and Bluetooth but keeps
+# updates (undo one with `pm enable <pkg>`), turns off the modem but keeps Bluetooth and
 # Wi-Fi, and lets the screen sleep. Takes effect fully after a reboot.
 #
 # If a disabled package crashes system_server, Android's RescueParty lands in recovery
@@ -32,9 +32,10 @@ grep -v -e '^#' -e '^$' "$src/debloat.list" | tr -d '\r' | while read -r pkg; do
     su -c 'pm uninstall-system-updates $pkg; pm clear $pkg' >/dev/null 2>&1" </dev/null
 done
 
-# Airplane mode without Wi-Fi in its radio list: modem, Bluetooth and NFC go off. Wi-Fi
-# is switched back on anyway, since turning airplane mode on sometimes still drops it;
-# Android then remembers to keep Wi-Fi on in airplane mode across reboots.
-"$adb" shell 'settings put global airplane_mode_radios cell,bluetooth,nfc,wimax &&
+# Airplane mode without Wi-Fi or Bluetooth in its radio list: modem and NFC go off. Both
+# are switched back on anyway, since turning airplane mode on sometimes still drops them;
+# Android then remembers to keep them on in airplane mode across reboots. (svc prints a
+# BOOTCLASSPATH dump and "Killed" even when it works.)
+"$adb" shell 'settings put global airplane_mode_radios cell,nfc,wimax &&
   cmd connectivity airplane-mode enable && cmd wifi set-wifi-enabled enabled &&
-  settings put global stay_on_while_plugged_in 0'
+  { svc bluetooth enable >/dev/null 2>&1; settings put global stay_on_while_plugged_in 0; }'
