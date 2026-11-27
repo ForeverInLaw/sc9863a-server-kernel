@@ -35,3 +35,6 @@ CONFIG_NETFILTER_XT_SET=y
 # xattr / ACLs on tmpfs (systemd, NixOS)
 CONFIG_TMPFS_POSIX_ACL=y
 CONFIG_TMPFS_XATTR=y
+
+# FocalTech FT8057 TDDI touchscreen (stock symbol, built in)
+CONFIG_TOUCHSCREEN_FOCALTECH_NEW=y
